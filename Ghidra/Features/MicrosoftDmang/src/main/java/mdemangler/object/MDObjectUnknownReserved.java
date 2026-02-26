@@ -19,39 +19,31 @@ import mdemangler.MDException;
 import mdemangler.MDMang;
 
 /**
- * This class represents MSFT Reserved Symbols as a base class for those that we are trying
- *  to parse.  If just this base class is assigned, then we plan to allow a fall-through for
- *  other processing outside of the demangler.
+ * This class represents MSFT Reserved Symbols that have unknown purpose.  Whenever an object
+ * that falls into this class is later recognizable, a new child of {@link MDObjectReserved}
+ * should be created for it
  */
-public abstract class MDObjectReserved extends MDObject {
+public class MDObjectUnknownReserved extends MDObjectReserved {
 
-	public MDObjectReserved(MDMang dmang) {
+	private String remainder;
+
+	public MDObjectUnknownReserved(MDMang dmang) {
 		super(dmang);
 	}
 
 	@Override
 	public void insert(StringBuilder builder) {
 		super.insert(builder);
+		builder.append(remainder);
 	}
 
 	@Override
 	protected void parseInternal() throws MDException {
+		String m = dmang.getMangledSymbol();
+		int index = dmang.getIndex();
+		remainder = m.substring(index);
 		//Go to end of string.
 		dmang.increment(dmang.getMangledSymbol().length() - dmang.getIndex());
 	}
 
-	/**
-	 * This method returns the <b><code>String</code></b> containing the sequence of ASCII-represented digits
-	 *  '0'-'9'.  The processing and capture of these digits is stopped when a non-digit
-	 *  is encountered.
-	 * @param dmang The <b><code>MDMang</code></b> demangler control.
-	 * @return The <b><code>String</code></b> containing the digits.
-	 */
-	protected static String parseDigits(MDMang dmang) {
-		String ret = "";
-		while ((dmang.peek() >= '0') && (dmang.peek() <= '9')) {
-			ret += dmang.getAndIncrement();
-		}
-		return ret;
-	}
 }
